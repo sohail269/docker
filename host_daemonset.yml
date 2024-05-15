@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: host-updater
+  labels:
+    app: host-updater
+spec:
+  selector:
+    matchLabels:
+      app: host-updater
+  template:
+    metadata:
+      labels:
+        app: host-updater
+    spec:
+      containers:
+      - name: host-updater
+        image: devopsartifact.jio.com/jpf-epsp__dev__dcr/debian:latest
+        imagePullPolicy: Always
+        command: ["/bin/bash", "-c"]
+        args:
+        - |
+          #!/bin/bash
+          data=$(cat <<EOF
+          APP_NAME\tHOST_NAME\tHOST_IP_ADDRESS
+          JAAPRDCHTSRV02_P\tNVMBD2BRY150V05\t10.141.193.118
+          JAAPRDCHTSRV03_P\tNVMBD2BRY170V02\t10.141.193.121
+          JAAPRDCHTSRV04_P\tNVMBD2BRY190V05\t10.141.193.128
+          JAAPRDCHTSRV02_B\tNVMBD2BRZ150V03\t10.141.193.143
+          JAAPRDCHTSRV03_B\tNVMBD2BRZ170V02\t10.141.193.147
+          JAAPRDCHTSRV04_B\tNVMBD2BRZ190V03\t10.141.193.152
+          JAAPRDCHTSRV01_P\tNVMBD2BPF50V03\t10.141.53.114
+          JAAPRDCHTSRV01_B\tNVMBD2BPG50V01\t10.141.53.131
+          JAADRCHTSRV02_P\tngprddrv015237\t10.149.104.183
+          JAADRCHTSRV02_B\tngprddrv015244\t10.149.104.191
+          JAADRCHTSRV03_P\tngprddrv015245\t10.149.104.192
+          JAADRCHTSRV04_B\tngprddrv015264\t10.149.104.211
+          JAADRCHTSRV01_P\tngprddrv015235\t10.149.104.181
+          JAADRCHTSRV01_B\tngprddrv015236\t10.149.104.182
+          JAADRCHTSRV04_P\tngprddrv015263\t10.149.104.210
+          JAADRCHTSRV03_B\tngprddrv015246\t10.149.104.193
+          EOF
+          )
+          echo "$data" | sudo tee -a /etc/hosts >/dev/null
+        securityContext:
+          privileged: true # Required to run commands with elevated privileges
+      restartPolicy: Always
